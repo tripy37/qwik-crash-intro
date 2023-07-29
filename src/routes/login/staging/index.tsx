@@ -1,10 +1,12 @@
-import { component$, useClientEffect$, useSignal } from "@builder.io/qwik";
+import { component$, useClientEffect$, useSignal, useContext } from "@builder.io/qwik";
 import type { DocumentHead } from "@builder.io/qwik-city";
 import { useNavigate } from "@builder.io/qwik-city";
 import { Link } from "@builder.io/qwik-city";
 import { supabase } from "~/utils/supabase";
+import { UserSessionContext } from "~/root";
 
 export default component$(() => {
+  const userSession: any = useContext(UserSessionContext)
   const isProtectedOk = useSignal(false);
   const nav = useNavigate();
 
@@ -16,9 +18,13 @@ export default component$(() => {
 
       if (data?.user?.id && !error) {
         isProtectedOk.value = true;
-        nav.path = "/members/dashboard";
+        userSession.userId = data?.user?.id;
+        userSession.isLoggedIn = true;
+        // nav.path = "/members/dashboard";
       } else {
         console.error(error);
+        userSession.userId = "";
+        userSession.isLoggedIn = false;
         nav.path = "/login";
       }
     }, 500);
